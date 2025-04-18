@@ -1,6 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from models import Intervento, session
 from datetime import datetime
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+
 
 app = Flask(__name__)
 
@@ -79,6 +84,90 @@ def elimina(id):
         session.delete(intervento)
         session.commit()
     return redirect(url_for("home"))
+
+@app.route("/invoice/<int:id>")
+def invoice(id):
+    intervento = session.query(Intervento).get(id)
+    if not intervento:
+        return redirect(url_for("home"))
+
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    # --- Header ---
+    p.setFont("Helvetica-Bold", 20)
+    p.drawString(30*mm, (height - 30*mm), "FATTURA INTERVENTO TECNICO")
+    # Linea sotto header
+    p.setLineWidth(1)
+    p.line(20*mm, (height - 32*mm), (width - 20*mm), (height - 32*mm))
+
+    # --- Dati Cliente & Data ---
+    p.setFont("Helvetica", 12)
+    y = height - 45*mm
+    p.drawString(30*mm, y, f"Cliente: {intervento.nome_cliente}")
+    p.drawString(120*mm, y, f"Data: {intervento.data.strftime('%d/%m/%Y')}")
+    # Linea di separazione
+    p.line(20*mm, (y - 2*mm), (width - 20*mm), (y - 2*mm))
+
+    # --- Tabella dettagli intervento ---
+    y -= 12*mm
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(30*mm, y, "Descrizione")
+    p.drawString(100*mm, y, "Quantità")
+    p.drawString(130*mm, y, "Prezzo Unitario")
+    p.drawString(170*mm, y, "Totale")
+    y -= 5*mm
+    p.setLineWidth(0.5)
+    p.line(20*mm, y, (width - 20*mm), y)
+
+    # Righe di dati
+    p.setFont("Helvetica", 12)
+    y -= 7*mm
+    # Intervento tecnico
+    descr = "Intervento tecnico"
+    qty = f"{intervento.durata_ore:.2f} h"
+    unit = "30,00 €"
+    total = f"{intervento.durata_ore * 30:.2f} €"
+    p.drawString(30*mm, y, descr)
+    p.drawString(100*mm, y, qty)
+    p.drawString(130*mm, y, unit)
+    p.drawString(170*mm, y, total)
+    y -= 7*mm
+
+    # Urgenza
+    if intervento.urgenza:
+        qty = "–"
+        unit = "+20,00 €"
+        total = "20,00 €"
+        p.drawString(30*mm, y, "Servizio urgente")
+        p.drawString(100*mm, y, qty)
+        p.drawString(130*mm, y, unit)
+        p.drawString(170*mm, y, total)
+        y -= 7*mm
+
+    # Linea sotto tabella
+    p.line(20*mm, (y - 2*mm), (width - 20*mm), (y - 2*mm))
+
+    # --- Totale complessivo ---
+    y -= 12*mm
+    p.setFont("Helvetica-Bold", 14)
+    p.drawRightString((width - 20*mm), y, f"Importo totale: {intervento.costo_totale:.2f} €")
+
+    # --- Footer ---
+    p.setFont("Helvetica-Oblique", 10)
+    p.drawString(30*mm, 20*mm, "Grazie per averci scelto! Per info chiamare Marco al 123-456-7890")
+
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"fattura_{intervento.id}.pdf",
+        mimetype="application/pdf"
+    )
 
 @app.route("/statistiche")
 def statistiche():
