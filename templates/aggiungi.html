@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuovo Intervento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<script>
+    const durataInput = document.querySelector('input[name="durata_ore"]');
+    const urgenzaCheckbox = document.getElementById('urgenza');
+    const costoDisplay = document.createElement('div');
+    costoDisplay.className = 'mt-2 fw-bold';
+    durataInput.parentNode.appendChild(costoDisplay);
+  
+    function aggiornaCosto() {
+      const ore = parseFloat(durataInput.value) || 0;
+      const urgente = urgenzaCheckbox.checked;
+      let costo = ore * 30;
+      if (urgente) costo += 20;
+      costoDisplay.textContent = `Costo stimato: ${costo.toFixed(2)} €`;
+    }
+  
+    durataInput.addEventListener('input', aggiornaCosto);
+    urgenzaCheckbox.addEventListener('change', aggiornaCosto);
+    // inizializza
+    aggiornaCosto();
+  </script>
+<body class="bg-light">
+
+<div class="container mt-5" style="max-width: 600px;">
+    <h1 class="mb-4 text-center">➕ Aggiungi Intervento</h1>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Nome Cliente</label>
+            <input type="text" name="nome_cliente" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Data Intervento</label>
+            <input type="date" name="data" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Durata (ore)</label>
+            <input type="number" step="0.1" name="durata_ore" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Note</label>
+            <textarea name="note" rows="3" class="form-control"></textarea>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Firma Cliente</label>
+            <canvas id="signature-pad" class="border" width=400 height=150></canvas>
+            <div class="mt-2">
+              <button type="button" id="clear" class="btn btn-sm btn-warning">🔄 Cancella</button>
+            </div>
+            <input type="hidden" name="signature" id="signature-input">
+          </div>
+          
+          <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+          <script>
+            const canvas = document.getElementById('signature-pad');
+            const sigPad = new SignaturePad(canvas);
+            document.getElementById('clear').addEventListener('click', () => sigPad.clear());
+            // On form submit, trasferisci il dataURL nel campo hidden
+            document.querySelector('form').addEventListener('submit', () => {
+              const dataURL = sigPad.isEmpty() ? '' : sigPad.toDataURL();
+              document.getElementById('signature-input').value = dataURL;
+            });
+          </script>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="risolto" id="risolto">
+            <label class="form-check-label" for="risolto">Problema Risolto ✅</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="urgenza" id="urgenza">
+            <label class="form-check-label" for="urgenza">Intervento Urgente ⚠️</label>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Salva Intervento</button>
+            <a href="/" class="btn btn-secondary ms-2">Annulla</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
