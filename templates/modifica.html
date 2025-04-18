@@ -2,90 +2,75 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Modifica Intervento</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'Modifica' if intervento else 'Nuovo' }} Intervento</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css">
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
-<body class="bg-light">
-  <div class="container mt-5" style="max-width:600px;">
-    <h1 class="mb-4 text-center">✏️ Modifica Intervento</h1>
+<body>
+  <nav class="navbar navbar-dark bg-dark mb-3">
+    <div class="container-fluid">
+      <a href="/" class="btn btn-outline-light btn-sm">← Home</a>
+      <span class="navbar-brand mb-0 h1">{{ 'Modifica' if intervento else 'Aggiungi' }} Intervento</span>
+    </div>
+  </nav>
 
-    <form method="POST">
+  <div class="container" style="max-width:500px;">
+    <form method="POST" class="bg-secondary p-4 rounded shadow-sm">
       <div class="mb-3">
-        <label class="form-label">Nome Cliente</label>
-        <input type="text" name="nome_cliente"
-               class="form-control" required
-               value="{{ intervento.nome_cliente }}">
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Data</label>
-        <input type="date" name="data"
-               class="form-control" required
-               value="{{ intervento.data }}">
+        <label class="form-label text-light">Nome Cliente</label>
+        <input type="text" name="nome_cliente" class="form-control form-control-lg" required
+               value="{{ intervento.nome_cliente if intervento else '' }}">
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Durata (ore)</label>
-        <input type="number" step="0.1" name="durata_ore"
-               class="form-control" required
-               value="{{ intervento.durata_ore }}">
+        <label class="form-label text-light">Data</label>
+        <input type="date" name="data" class="form-control" required
+               value="{{ intervento.data if intervento else '' }}">
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Note</label>
-        <textarea name="note" rows="3"
-                  class="form-control">{{ intervento.note }}</textarea>
+        <label class="form-label text-light">Durata (ore)</label>
+        <input type="number" step="0.1" name="durata_ore" class="form-control" required
+               value="{{ intervento.durata_ore if intervento else '' }}">
       </div>
 
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox"
-               name="risolto" id="risolto"
-               {% if intervento.risolto %}checked{% endif %}>
-        <label class="form-check-label" for="risolto">
-          Problema Risolto ✅
-        </label>
+      <div class="mb-3">
+        <label class="form-label text-light">Note</label>
+        <textarea name="note" rows="3" class="form-control">{{ intervento.note if intervento else '' }}</textarea>
       </div>
 
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox"
-               name="urgenza" id="urgenza"
-               {% if intervento.urgenza %}checked{% endif %}>
-        <label class="form-check-label" for="urgenza">
-          Intervento Urgente ⚠️
-        </label>
+      <div class="form-check form-switch mb-3 text-light">
+        <input class="form-check-input" type="checkbox" name="risolto" id="risolto"
+               {% if intervento and intervento.risolto %}checked{% endif %}>
+        <label class="form-check-label" for="risolto">Problema risolto</label>
       </div>
 
-      <!-- Firma (facoltativo: se vuoi permettere di riscrivere la firma) -->
-      <div class="mb-4">
+      <div class="form-check form-switch mb-3 text-light">
+        <input class="form-check-input" type="checkbox" name="urgenza" id="urgenza"
+               {% if intervento and intervento.urgenza %}checked{% endif %}>
+        <label class="form-check-label" for="urgenza">Intervento urgente</label>
+      </div>
+
+      <div class="mb-3 text-light">
         <label class="form-label">Firma Cliente</label>
-        <canvas id="signature-pad" class="border" width=400 height=150></canvas>
-        <div class="mt-2">
-          <button type="button" id="clear" class="btn btn-sm btn-warning">🔄 Cancella</button>
-        </div>
+        <canvas id="signature-pad" class="border bg-white w-100 rounded" height=150></canvas>
+        <button type="button" id="clear" class="btn btn-sm btn-warning mt-2">🔄 Pulisci</button>
         <input type="hidden" name="signature" id="signature-input">
       </div>
 
-      <div class="text-center">
-        <button type="submit" class="btn btn-success">Salva Modifiche</button>
-        <a href="/" class="btn btn-secondary ms-2">Annulla</a>
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary btn-lg">{{ 'Salva' if intervento else 'Aggiungi' }}</button>
       </div>
     </form>
   </div>
 
   <script>
-    // SignaturePad initialization
     const canvas = document.getElementById('signature-pad');
     const sigPad = new SignaturePad(canvas);
     document.getElementById('clear').addEventListener('click', () => sigPad.clear());
-
-    // on submit trasferisci dataURL
     document.querySelector('form').addEventListener('submit', () => {
-      const dataURL = sigPad.isEmpty() ? '' : sigPad.toDataURL();
-      document.getElementById('signature-input').value = dataURL;
+      document.getElementById('signature-input').value = sigPad.isEmpty() ? '' : sigPad.toDataURL();
     });
   </script>
 </body>
