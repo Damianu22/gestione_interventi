@@ -24,6 +24,7 @@ def aggiungi():
         risolto = "risolto" in request.form
         urgenza = "urgenza" in request.form
         signature = request.form.get("signature", "")
+        tipo_pagamento = request.form["tipo_pagamento"]
 
         costo = durata * 30
         if urgenza:
@@ -37,7 +38,8 @@ def aggiungi():
             risolto=risolto,
             urgenza=urgenza,
             costo_totale=costo,
-            signature=signature
+            signature=signature,
+            tipo_pagamento=tipo_pagamento
         )
         session.add(nuovo)
         session.commit()
@@ -154,9 +156,14 @@ def invoice(id):
     p.setFont("Helvetica-Bold", 14)
     p.drawRightString((width - 20*mm), y, f"Importo totale: {intervento.costo_totale:.2f} €")
 
+    y -= 12*mm  # Sposta un po' verso il basso
+    p.setFont("Helvetica", 12)
+    p.drawString(30*mm, y, f"Metodo di pagamento: {intervento.tipo_pagamento}")
+
+
     # --- Footer ---
     p.setFont("Helvetica-Oblique", 10)
-    p.drawString(30*mm, 20*mm, "Grazie per averci scelto! Per info chiamare Marco al 123-456-7890")
+    p.drawString(30*mm, 20*mm, "Grazie per averci scelto! Per info chiamare Marco al +39 339 588 0581")
 
     p.showPage()
     p.save()

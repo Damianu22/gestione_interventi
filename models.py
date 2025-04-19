@@ -17,7 +17,7 @@ class Intervento(Base):
     urgenza = Column(Boolean, default=False)
     costo_totale = Column(Float)
     signature = Column(String)
-
+    tipo_pagamento = Column(String)
 # 🔧 Setup DB engine + session
 engine = create_engine('sqlite:///interventi.db')
 Base.metadata.create_all(engine)
