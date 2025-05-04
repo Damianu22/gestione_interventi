@@ -61,6 +61,22 @@
         <label class="form-check-label" for="urgenza">Intervento urgente</label>
       </div>
 
+      <!-- TIPO DI PAGAMENTO -->
+      <div class="mb-3">
+        <label class="form-label text-light" for="tipo_pagamento">Tipo di pagamento</label>
+        <select name="tipo_pagamento" id="tipo_pagamento"
+                class="form-select" required>
+          <option value="Contanti"
+            {% if intervento.tipo_pagamento == 'Contanti' %}selected{% endif %}>
+            Contanti
+          </option>
+          <option value="Bonifico"
+            {% if intervento.tipo_pagamento == 'Bonifico' %}selected{% endif %}>
+            Bonifico
+          </option>
+        </select>
+      </div>
+
       <div class="mb-3 text-light">
         <label class="form-label">Firma Cliente</label>
         <canvas id="signature-pad" class="border bg-white w-100 rounded" height=150></canvas>

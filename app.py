@@ -63,8 +63,10 @@ def modifica(id):
         intervento.risolto = "risolto" in request.form
         intervento.urgenza = "urgenza" in request.form
         new_sig = request.form.get("signature", "")
+        
         if new_sig:
             intervento.signature = new_sig
+        intervento.tipo_pagamento = request.form["tipo_pagamento"]
 
         # ricalcola il costo
         costo = intervento.durata_ore * 30
@@ -151,14 +153,12 @@ def invoice(id):
     # Linea sotto tabella
     p.line(20*mm, (y - 2*mm), (width - 20*mm), (y - 2*mm))
 
-    # --- Totale complessivo ---
-    y -= 12*mm
-    p.setFont("Helvetica-Bold", 14)
-    p.drawRightString((width - 20*mm), y, f"Importo totale: {intervento.costo_totale:.2f} €")
 
-    y -= 12*mm  # Sposta un po' verso il basso
-    p.setFont("Helvetica", 12)
+    # --- Totale complessivo + Metodo di pagamento sulla stessa riga ---
+    y -= 12*mm
+    p.setFont("Helvetica-Bold", 12)
     p.drawString(30*mm, y, f"Metodo di pagamento: {intervento.tipo_pagamento}")
+    p.drawRightString((width - 20*mm), y, f"Importo totale: {intervento.costo_totale:.2f} €")
 
 
     # --- Footer ---
